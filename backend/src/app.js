@@ -4,13 +4,21 @@ const formRoute = require("./api/routes/formRoutes");
 const { errorHandler } = require("./api/middlewares/error");
 
 const app = express();
+const allowedOrigins = process.env.CORS_ORIGIN.split(',');
 
-app.use(cors({
-    origin: process.env.CORS_ORIGIN,
-    credentials: true,
-}));
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('This origin is not allowed by CORS'));
+    }
+  },
+  credentials: true, 
+};
 
-// Body parsing middleware
+app.use(cors(corsOptions));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
