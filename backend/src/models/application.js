@@ -15,11 +15,11 @@ const applicationSchema = new Schema({
     },
     position: {
         type: String,
+        trim: true,
         required: true,
     },
     resumeUrl: {
         type: String,
-        required: true,
     },
     coverLetter: {
         type: String,

@@ -6,6 +6,7 @@ const Contact: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    subject: '',
     message: ''
   });
   const [careerData, setCareerData] = useState({
@@ -23,7 +24,7 @@ const Contact: React.FC = () => {
     console.log('Contact form submitted:', formData);
     setIsSubmitted(true);
     setTimeout(() => setIsSubmitted(false), 3000);
-    setFormData({ name: '', email: '', message: '' });
+    setFormData({ name: '', email: '', subject: '', message: '' });
   };
 
   const handleCareerSubmit = (e: React.FormEvent) => {
@@ -129,6 +130,7 @@ const Contact: React.FC = () => {
                   <input
                     type="text"
                     id="name"
+                    name="name"
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -143,12 +145,28 @@ const Contact: React.FC = () => {
                   </label>
                   <input
                     type="email"
+                    name="email"
                     id="email"
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                     placeholder="your.email@example.com"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
+                    Subject *
+                  </label>
+                  <input
+                    type="text"
+                    name="subject"
+                    id="subject"
+                    required
+                    value={formData.subject}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    placeholder="Enter the Subject"
                   />
                 </div>
 
@@ -158,6 +176,7 @@ const Contact: React.FC = () => {
                   </label>
                   <textarea
                     id="message"
+                    name="message"
                     required
                     rows={5}
                     value={formData.message}
@@ -209,6 +228,7 @@ const Contact: React.FC = () => {
                   </label>
                   <input
                     type="text"
+                    name="name"
                     id="career-name"
                     required
                     value={careerData.name}
@@ -224,6 +244,7 @@ const Contact: React.FC = () => {
                   </label>
                   <input
                     type="email"
+                    name="email"
                     id="career-email"
                     required
                     value={careerData.email}
@@ -239,6 +260,7 @@ const Contact: React.FC = () => {
                   </label>
                   <select
                     id="position"
+                    name="position"
                     value={careerData.position}
                     onChange={(e) => setCareerData({ ...careerData, position: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
@@ -255,11 +277,26 @@ const Contact: React.FC = () => {
                 </div>
 
                 <div>
+                  <label htmlFor="position" className="block text-sm font-medium text-gray-700 mb-2">
+                    Resume
+                  </label>
+                  <input 
+                    type="file"
+                    id="resume" 
+                    name="resume" 
+                    accept=".pdf,.doc,.docx" 
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    required>
+                  </input>
+                </div>
+
+                <div>
                   <label htmlFor="career-message" className="block text-sm font-medium text-gray-700 mb-2">
                     Cover Letter / Message *
                   </label>
                   <textarea
                     id="career-message"
+                    name="coverLetter"
                     required
                     rows={5}
                     value={careerData.message}

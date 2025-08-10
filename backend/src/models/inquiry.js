@@ -13,6 +13,10 @@ const inquirySchema = new Schema({
         trim: true,
         lowercase: true,
     },
+    subject: {
+        type: String,
+        required: true,
+    },
     message: {
         type: String,
         trim: true,
