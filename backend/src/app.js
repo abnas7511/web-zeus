@@ -10,7 +10,9 @@ app.use(cors({
     credentials: true,
 }));
 
+// Body parsing middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/forms", formRoute);
 
