@@ -1,38 +1,92 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin, Send, CheckCircle } from 'lucide-react';
+import axios, { AxiosError } from 'axios';
+import Spinner from '../components/Spinner';
 
 const Contact: React.FC = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: ''
-  });
-  const [careerData, setCareerData] = useState({
-    name: '',
-    email: '',
-    position: '',
-    message: ''
-  });
+  // const [formData, setFormData] = useState({
+  //   name: '',
+  //   email: '',
+  //   subject: '',
+  //   message: ''
+  // });
+  // const [careerData, setCareerData] = useState({
+  //   name: '',
+  //   email: '',
+  //   position: '',
+  //   message: ''
+  // });
+  const [inquiryMessage, setInquiryMessage] = useState('');
+  const [applicationMessage, setApplicationMessage] = useState('');
+  const [isError, setIsError] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isCareerSubmitted, setIsCareerSubmitted] = useState(false);
+  const [isInquiryLoading, setIsInquiryLoading] = useState(false);
+  const [isApplicationLoading, setIsApplicationLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Here you would typically send the data to your backend
-    console.log('Contact form submitted:', formData);
-    setIsSubmitted(true);
-    setTimeout(() => setIsSubmitted(false), 3000);
-    setFormData({ name: '', email: '', message: '' });
+  const handleSubmit = async(e: React.FormEvent) => {
+    try {
+      e.preventDefault();
+      setIsInquiryLoading(true);
+      setInquiryMessage('');
+      const form = e.target as HTMLFormElement;
+      const formDataObj = new FormData(form);
+      console.log('Contact form submitted:', Object.fromEntries(formDataObj.entries()));
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/api/forms/inquiry`,
+        formDataObj,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      setInquiryMessage(response.data.message);
+      setIsError(false);
+      setIsSubmitted(true);
+      setTimeout(() => setIsSubmitted(false), 3000);
+      form.reset();
+    } catch(error) {
+        setIsError(true);
+        if (error instanceof AxiosError) {
+          setInquiryMessage(error.response?.data?.message || 'An error occurred.');
+        } else {
+          setInquiryMessage('An unexpected error occurred. Please try again.');
+        }
+    } finally {
+      setIsInquiryLoading(false);
+    }
   };
 
-  const handleCareerSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Here you would typically send the data to your backend
-    console.log('Career form submitted:', careerData);
-    setIsCareerSubmitted(true);
-    setTimeout(() => setIsCareerSubmitted(false), 3000);
-    setCareerData({ name: '', email: '', position: '', message: '' });
+  const handleCareerSubmit = async(e: React.FormEvent) => {
+    try {
+      e.preventDefault();
+      // Here you would typically send the data to your backend
+      setIsApplicationLoading(true);
+      setApplicationMessage('');
+      const form = e.target as HTMLFormElement;
+      const formDataObj = new FormData(form);
+      console.log('Career form submitted:', Object.fromEntries(formDataObj.entries()));
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/api/forms/application`,
+        formDataObj,
+      );
+      setApplicationMessage(response.data.message);
+      setIsError(false);
+      setIsCareerSubmitted(true);
+      setTimeout(() => setIsCareerSubmitted(false), 3000);
+      form.reset();
+    } catch(error) {
+        setIsError(true);
+        if (error instanceof AxiosError) {
+          setApplicationMessage(error.response?.data?.message || 'An error occurred.');
+        } else {
+          setApplicationMessage('An unexpected error occurred. Please try again.');
+        }
+    } finally {
+      setIsApplicationLoading(false);
+    }
   };
 
   return (
@@ -129,9 +183,8 @@ const Contact: React.FC = () => {
                   <input
                     type="text"
                     id="name"
+                    name="name"
                     required
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                     placeholder="Your full name"
                   />
@@ -143,12 +196,24 @@ const Contact: React.FC = () => {
                   </label>
                   <input
                     type="email"
+                    name="email"
                     id="email"
                     required
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                     placeholder="your.email@example.com"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
+                    Subject *
+                  </label>
+                  <input
+                    type="text"
+                    name="subject"
+                    id="subject"
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    placeholder="Enter the Subject"
                   />
                 </div>
 
@@ -158,20 +223,21 @@ const Contact: React.FC = () => {
                   </label>
                   <textarea
                     id="message"
+                    name="message"
                     required
                     rows={5}
-                    value={formData.message}
-                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none"
                     placeholder="Tell us about your hospital's needs or ask any questions..."
                   />
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={isSubmitted}
-                  className="w-full flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
+                { isInquiryLoading ? <Spinner /> : 
+                  <button
+                    type="submit"
+                    disabled={isSubmitted}
+                    className="w-full flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                
                   {isSubmitted ? (
                     <>
                       <CheckCircle className="w-5 h-5 mr-2" />
@@ -184,7 +250,13 @@ const Contact: React.FC = () => {
                     </>
                   )}
                 </button>
+                }
               </form>
+              {inquiryMessage && (
+                <p style={{ color: isError ? 'red' : 'green' }}>{inquiryMessage}</p>
+              )}
+
+              
             </motion.div>
 
             {/* Career Form */}
@@ -209,10 +281,9 @@ const Contact: React.FC = () => {
                   </label>
                   <input
                     type="text"
+                    name="name"
                     id="career-name"
                     required
-                    value={careerData.name}
-                    onChange={(e) => setCareerData({ ...careerData, name: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                     placeholder="Your full name"
                   />
@@ -224,10 +295,9 @@ const Contact: React.FC = () => {
                   </label>
                   <input
                     type="email"
+                    name="email"
                     id="career-email"
                     required
-                    value={careerData.email}
-                    onChange={(e) => setCareerData({ ...careerData, email: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                     placeholder="your.email@example.com"
                   />
@@ -239,8 +309,7 @@ const Contact: React.FC = () => {
                   </label>
                   <select
                     id="position"
-                    value={careerData.position}
-                    onChange={(e) => setCareerData({ ...careerData, position: e.target.value })}
+                    name="position"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                   >
                     <option value="">Select a position</option>
@@ -255,21 +324,34 @@ const Contact: React.FC = () => {
                 </div>
 
                 <div>
+                  <label htmlFor="position" className="block text-sm font-medium text-gray-700 mb-2">
+                    Resume
+                  </label>
+                  <input 
+                    type="file"
+                    id="resume" 
+                    name="resume" 
+                    accept=".pdf,.doc,.docx" 
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    required>
+                  </input>
+                </div>
+
+                <div>
                   <label htmlFor="career-message" className="block text-sm font-medium text-gray-700 mb-2">
                     Cover Letter / Message *
                   </label>
                   <textarea
                     id="career-message"
+                    name="coverLetter"
                     required
                     rows={5}
-                    value={careerData.message}
-                    onChange={(e) => setCareerData({ ...careerData, message: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none"
                     placeholder="Tell us about your background and why you want to join Zeus Robotics..."
                   />
                 </div>
 
-                <button
+                { isApplicationLoading ? <Spinner /> : <button
                   type="submit"
                   disabled={isCareerSubmitted}
                   className="w-full flex items-center justify-center px-6 py-3 bg-gradient-to-r from-green-600 to-blue-600 text-white font-semibold rounded-lg hover:from-green-700 hover:to-blue-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -285,8 +367,11 @@ const Contact: React.FC = () => {
                       Submit Application
                     </>
                   )}
-                </button>
+                </button> }
               </form>
+              {applicationMessage && (
+                <p style={{ color: isError ? 'red' : 'green' }}>{applicationMessage}</p>
+              )}
             </motion.div>
           </div>
         </div>
